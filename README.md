@@ -1,7 +1,5 @@
 # ohana_wireless
 
-# ohana_wireless
-
 In CAI environment before data generation, create a python project template and change cdsw.sh  
 
 pip install scikit-learn  

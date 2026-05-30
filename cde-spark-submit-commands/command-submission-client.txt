@@ -1,0 +1,38 @@
+Write now Jupiter Notebook is setup for CDE job submission in 
+ssh -i athangamani-cdp-oregon.pem ubuntu@35.91.66.114
+jupyter-arun@ip-10-0-0-183:~$ 
+
+CDE Service : ohana-wireless-service
+Virtual cluster - Default-Virtual-Cluster
+Environment : ps-amer-sandbox-aws  
+
+
+cde spark submit \
+ --min-executors=4 \
+ --executor-memory=10G \
+ --executor-cores=4 \
+ --conf "spark.driver.memory=8g" \
+ --conf "spark.driver.cores=2" \
+ --conf "spark.dynamicAllocation.initialExecutors=4" \
+ --conf "spark.dynamicAllocation.maxExecutors=18" \
+ --conf "spark.kerberos.access.hadoopFileSystems=s3a://ps-amer-ohana-telecom" \
+ --conf "spark.hadoop.fs.s3a.endpoint.region=us-east-2" \
+ --conf "spark.hadoop.fs.s3a.endpoint=s3.us-east-2.amazonaws.com" \
+ --packages "com.databricks:spark-xml_2.12:0.17.0" \
+ --python-env-resource-name pm-pandas-env \
+ pm_batch_dq.py
+
+cde spark submit --min-executors=4   \
+ --executor-memory=10G   \
+ --executor-cores=4   \
+ --driver-memory=8G   \
+ --conf "spark.driver.cores=2"   \
+ --conf "spark.dynamicAllocation.initialExecutors=4"   \
+ --conf "spark.dynamicAllocation.maxExecutors=18"   \
+ --conf "spark.kubernetes.memoryOverheadFactor=0.4"   \
+ --conf "spark.kerberos.access.hadoopFileSystems=s3a://ps-amer-ohana-telecom"   \
+ --conf "spark.hadoop.fs.s3a.endpoint.region=us-east-2"   \
+ --conf "spark.hadoop.fs.s3a.endpoint=s3.us-east-2.amazonaws.com"   \
+ --packages "com.databricks:spark-xml_2.12:0.17.0"   \
+ --python-env-resource-name pm-pandas-env   
+ feature_engineering.py 

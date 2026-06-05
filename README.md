@@ -40,3 +40,7 @@ The original 500 events are in.
 s3://ps-amer-ohana-telecom/reference/events/events_calendar.json.  
 
 
+for running xgboost i had to open up a session in CAI and go to terminal access and run the following one by one
+pip install scikit-learn.  
+pip install xgboost optuna optuna-integration[mlflow] scikit-learn pyiceberg[hive,s3fs] matplotlib.  
+

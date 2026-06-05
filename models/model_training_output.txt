@@ -1,0 +1,31 @@
+Connecting to CDW Impala Virtual Warehouse...
+Finding a valid Cell ID in Chicago...
+Targeting Cell: CELL003799
+Executing C++ MPP engine scan on Iceberg Data Lake...
+Transferring results directly into Pandas...
+✅ Successfully loaded 69,117 rows from CDW into memory!
+Casting Impala objects to native floats for XGBoost...
+Sorting by cell and time to prevent data leakage...
+Dropping initial 672 intervals per cell (lag initialization)...
+Creating run for experiment_id: w5h4-r2yc-kfbg-sm2d, user_id: cdsw, run_name: XGBoost_Optuna_Champion
+Train size: 50944 | Val size: 8715 | Test size: 8786
+[I 2026-06-04 04:58:31,638] A new study created in memory with name: no-name-bfde6096-1cba-412b-9241-5c34eb337df0
+Starting Optuna Hyperparameter Search (10 Trials)...
+[I 2026-06-04 04:58:32,421] Trial 0 finished with value: 4.891436727127652 and parameters: {'n_estimators': 286, 'max_depth': 3, 'learning_rate': 0.11266740937186755, 'subsample': 0.8002994569417765, 'colsample_bytree': 0.8814035129638956}. Best is trial 0 with value: 4.891436727127652.
+[I 2026-06-04 04:58:32,857] Trial 1 finished with value: 4.8995128145241855 and parameters: {'n_estimators': 141, 'max_depth': 5, 'learning_rate': 0.19518314943924542, 'subsample': 0.7936256305632818, 'colsample_bytree': 0.7881943668320275}. Best is trial 0 with value: 4.891436727127652.
+[I 2026-06-04 04:58:33,499] Trial 2 finished with value: 4.870920788705673 and parameters: {'n_estimators': 219, 'max_depth': 5, 'learning_rate': 0.025511857782345822, 'subsample': 0.8688220975018142, 'colsample_bytree': 0.8673091628445513}. Best is trial 2 with value: 4.870920788705673.
+[I 2026-06-04 04:58:35,315] Trial 3 finished with value: 4.727269122403645 and parameters: {'n_estimators': 406, 'max_depth': 7, 'learning_rate': 0.017893706253466517, 'subsample': 0.8053555950612603, 'colsample_bytree': 0.757944181281707}. Best is trial 3 with value: 4.727269122403645.
+[I 2026-06-04 04:58:36,366] Trial 4 finished with value: 4.861080526268238 and parameters: {'n_estimators': 425, 'max_depth': 4, 'learning_rate': 0.18907735944895565, 'subsample': 0.8126481776934209, 'colsample_bytree': 0.7989883896935027}. Best is trial 3 with value: 4.727269122403645.
+[I 2026-06-04 04:58:37,552] Trial 5 finished with value: 5.090301675802361 and parameters: {'n_estimators': 410, 'max_depth': 5, 'learning_rate': 0.010263702008081228, 'subsample': 0.9982996664257838, 'colsample_bytree': 0.8295914339653176}. Best is trial 3 with value: 4.727269122403645.
+[I 2026-06-04 04:58:38,715] Trial 6 finished with value: 4.964198442216701 and parameters: {'n_estimators': 493, 'max_depth': 4, 'learning_rate': 0.015016295525433779, 'subsample': 0.7908527064667215, 'colsample_bytree': 0.7132777373582206}. Best is trial 3 with value: 4.727269122403645.
+[I 2026-06-04 04:58:39,699] Trial 7 finished with value: 4.7601255876558195 and parameters: {'n_estimators': 184, 'max_depth': 8, 'learning_rate': 0.09004989022572976, 'subsample': 0.9773130792485174, 'colsample_bytree': 0.8854113120600579}. Best is trial 3 with value: 4.727269122403645.
+[I 2026-06-04 04:58:40,471] Trial 8 finished with value: 4.833434003339844 and parameters: {'n_estimators': 263, 'max_depth': 5, 'learning_rate': 0.04226944322034131, 'subsample': 0.8400920561025788, 'colsample_bytree': 0.7487549485783953}. Best is trial 3 with value: 4.727269122403645.
+[I 2026-06-04 04:58:42,153] Trial 9 finished with value: 4.728025856511923 and parameters: {'n_estimators': 461, 'max_depth': 6, 'learning_rate': 0.05312176264150736, 'subsample': 0.751476418013278, 'colsample_bytree': 0.9649364817016441}. Best is trial 3 with value: 4.727269122403645.
+Best Validation MAPE: 4.73%
+Training final Champion Model with best parameters...
+🏆 Final Held-Out Test MAPE: 4.50%
+/home/cdsw/.local/lib/python3.10/site-packages/xgboost/sklearn.py:1116: UserWarning: [04:58:43] WARNING: /__w/xgboost/xgboost/src/c_api/c_api.cc:1573: Saving model in the UBJSON format as default.  You can use a file extension: `json` or `ubj` to choose between formats.
+  self.get_booster().save_model(fname)
+✅ Model successfully tracked in MLflow!
+
+Click to add a cell.

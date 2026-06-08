@@ -86,12 +86,24 @@ df_cast = df.select(
 )
 
 # ---------------------------------------------------------
-# STEP 3: WRITE TO S3 RAW ARCHIVE
+# STEP 3: WRITE TO S3 RAW ARCHIVE (USING BOTO3)
 # ---------------------------------------------------------
-# Partitioning by processing date so S3 stays organized
-s3_raw_path = f"s3a://{S3_BUCKET}/raw/events/{START_DATE.strftime('%Y/%m/%d')}/"
-print(f"Writing raw JSON to S3 landing zone: {s3_raw_path}")
-df_cast.write.mode("overwrite").json(s3_raw_path)
+import io
+
+s3_raw_key = f"raw/events/{START_DATE.strftime('%Y/%m/%d')}/daily_events.json"
+print(f"Writing raw JSON to S3 landing zone using Boto3: {s3_raw_key}")
+
+# Convert the Spark DataFrame to Pandas, then to a JSON string buffer
+pdf = df_cast.toPandas()
+json_buffer = io.StringIO()
+pdf.to_json(json_buffer, orient='records', indent=2)
+
+# Use boto3 to put the object, bypassing Ranger RAZ
+s3.put_object(
+    Bucket=S3_BUCKET, 
+    Key=s3_raw_key, 
+    Body=json_buffer.getvalue()
+)
 
 # ---------------------------------------------------------
 # STEP 4: WRITE TO KAFKA (REAL-TIME PIPELINE)

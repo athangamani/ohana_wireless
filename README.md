@@ -44,3 +44,34 @@ for running xgboost i had to open up a session in CAI and go to terminal access 
 pip install scikit-learn.  
 pip install xgboost optuna optuna-integration[mlflow] scikit-learn pyiceberg[hive,s3fs] matplotlib.  
 
+
+Now setting up the nifi flow to read ftp data from the ubuntu box
+ssh ubuntu@35.91.66.114
+Password Ohana2026!
+this is not working yet
+ubuntu@ip-10-0-0-183:~$ sudo passwd ubuntu
+New password: 
+Retype new password: 
+passwd: password updated successfully
+ubuntu@ip-10-0-0-183:~$ sudo nano /etc/ssh/sshd_config
+ubuntu@ip-10-0-0-183:~$ sudo systemctl restart ssh
+PasswordAuthentication yes
+ubuntu@ip-10-0-0-183:~$ Read from remote host 35.91.66.114: No route to host
+Connection to 35.91.66.114 closed.
+client_loop: send disconnect: Broken pipe
+arunthangamani@G5LFC2PC9W tower-data-generator % ssh ubuntu@35.91.66.114
+ubuntu@35.91.66.114: Permission denied (publickey).
+
+ssh -i ~/Downloads/ec2-machine.pem ubuntu@35.91.66.114
+ls -l /etc/ssh/sshd_config.d/
+sudo nano /etc/ssh/sshd_config.d/50-cloud-init.conf
+Inside that file, you will almost certainly see this line:
+PasswordAuthentication no
+Change it to:
+PasswordAuthentication yes
+Press Ctrl+O, then Enter to save. Press Ctrl+X to exit.
+Step 4: Restart the SSH Service again
+sudo systemctl restart ssh
+ssh ubuntu@35.91.66.114
+Ohana2026!
+

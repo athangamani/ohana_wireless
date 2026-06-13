@@ -40,15 +40,9 @@ The original 500 events are in.
 s3://ps-amer-ohana-telecom/reference/events/events_calendar.json.  
 
 
-for running xgboost i had to open up a session in CAI and go to terminal access and run the following one by one
-pip install scikit-learn.  
-pip install xgboost optuna optuna-integration[mlflow] scikit-learn pyiceberg[hive,s3fs] matplotlib.  
-
-
 Now setting up the nifi flow to read ftp data from the ubuntu box
 ssh ubuntu@35.91.66.114
 Password Ohana2026!
-this is not working yet
 ubuntu@ip-10-0-0-183:~$ sudo passwd ubuntu
 New password: 
 Retype new password: 
@@ -75,3 +69,44 @@ sudo systemctl restart ssh
 ssh ubuntu@35.91.66.114
 Ohana2026!
 
+historically how the tables got filled up.  
+generate topology.  
+generate core network.   
+generate events    
+   and then generate events became a single job that generated events wrote into iceberg table, kafka and s3    folder (events-master-pipeline.py).    
+we first generated a raw-pm s3 folders that had the big xml messages - generate random-pm-data.   
+then we did load-data-to-tables.   
+    load-topology.   
+    load-neighbors.   
+    load-events.   
+    etl_pm_curated.py.    
+we generated ml_feature_store using feature_engineering.   
+then we backfilled ml_feature_store with events using ml_feature_engineering_historical_backfill.   
+
+then see the demo steps to setup the demo.    
+also there is a nightly job that in under airflow folder which runs 3 jobs    
+    events_master_pipeline.py.   
+    feature_engineering_incremental.py.  
+    kpi_sliding_window.py - the kpi metrics is for dashboards we did not use it anywhere.  
+
+demo steps.  
+0) train and deploy the demo. 
+0) start the nifi job to write to ftp server and kafka topic.  
+0) start the processing_cell_tower_telemetry.py job to read from kafka topic and write to impala.  
+1) inject mega event to trigger the alert.  
+2) run the flush script to simulate the flush phase with 90% DL PRB utilization.  
+3) check impala to see data from tower    
+-- Force Impala to see the new records    
+INVALIDATE METADATA ohana.live_inference_stream;   
+-- Verify it is sitting at the very top of the table.   
+SELECT    
+    window_start,    
+    rolling_ul_utilization_pct   
+FROM ohana.live_inference_stream   
+WHERE cell_id = 'CELL001801'    
+ORDER BY window_start DESC   
+LIMIT 3;  
+4) check the model api to see the alert firing   
+5) run the recovery cool-off script to simulate the recovery phase with 0% DL PR.   
+6) check the model api to see the alert recovery    
+ 

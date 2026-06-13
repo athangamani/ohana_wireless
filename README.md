@@ -134,4 +134,47 @@ LIMIT 3;
 4) check the model api to see the alert firing   
 5) run the recovery cool-off script to simulate the recovery phase with 0% DL PR.   
 6) check the model api to see the alert recovery    
- 
+
+throughout the process of using cde I used jupyterhub to edit code and submit to cde. 
+jupyterhub login modifications are written in    
+https://docs.google.com/document/d/1Ji0sWwCt97HoHRVlwZUpd4f5IV-S1uYXGTU3me2dM5g/edit?tab=t.0   
+
+directory listing of the jupyter hub user arun.. who submitted all the jobs..    
+jupyter-arun@ip-10-0-0-183:~$ ls 
+
+jupyter-arun@ip-10-0-0-183:~$ ls -alt   
+total 292.  
+-rw-------  1 jupyter-arun jupyter-arun 41991 Jun 13 03:15 .bash_history.   
+drwxr-x---  8 jupyter-arun jupyter-arun  4096 Jun 12 01:56 .   
+-rw-------  1 jupyter-arun jupyter-arun    20 Jun 12 01:56 .lesshst.  
+-rw-r--r--  1 jupyter-arun jupyter-arun 80889 Jun 12 01:55 generate_random_pm_data.ipynb.   
+-rw-r--r--  1 jupyter-arun jupyter-arun  5106 Jun 12 01:53 processing_cell_tower_telemetry.py.   
+drwxr-xr-x  2 jupyter-arun jupyter-arun  4096 Jun 10 22:09 .ipynb_checkpoints.    
+-rw-r--r--  1 jupyter-arun jupyter-arun  5424 Jun 10 21:36 training_gbt_classifier_model.py.  
+-rw-r--r--  1 jupyter-arun jupyter-arun  1093 Jun  9 05:24 inject_mega_event.py    
+-rw-r--r--  1 jupyter-arun jupyter-arun  2976 Jun  8 20:06 kpi_sliding_window.py.   
+-rw-r--r--  1 jupyter-arun jupyter-arun  7208 Jun  8 20:01 feature_engineering_incremental.py.   
+-rw-r--r--  1 jupyter-arun jupyter-arun  1749 Jun  8 19:49 daily_pipeline.py.   
+-rw-r--r--  1 jupyter-arun jupyter-arun  5814 Jun  8 18:37 events_master_pipeline.py.   
+-rw-r--r--  1 jupyter-arun jupyter-arun   831 Jun  8 03:59 update_live_inference_stream.py.    
+-rw-r--r--  1 jupyter-arun jupyter-arun   968 Jun  8 03:09 update_pm_curated_constraints.py.    
+-rw-r--r--  1 jupyter-arun jupyter-arun  2414 Jun  8 01:01 ml_feature_store_historical_backfill.py.   
+drwxr-xr-x 10 root         root          4096 Jun  5 20:41 ..     
+-rw-r--r--  1 jupyter-arun jupyter-arun  5862 May 29 21:25 feature_engineering.py.   
+-rw-r--r--  1 jupyter-arun jupyter-arun  5118 May 28 00:46 pm_batch_dq.py.   
+-rw-r--r--  1 jupyter-arun jupyter-arun  3299 May 20 19:57 pm_kafka_to_iceberg.py.   
+-rw-r--r--  1 jupyter-arun jupyter-arun  7717 May 20 19:13 generate_random_pm_data.py.   
+drwxrwxr-x  2 jupyter-arun jupyter-arun  4096 May 19 22:54 .cde.   
+-rw-------  1 jupyter-arun jupyter-arun  9385 May 19 22:54 .viminfo.   
+-rw-r--r--  1 jupyter-arun jupyter-arun   689 May 16 23:35 load_neighbors.py.   
+-rw-r--r--  1 jupyter-arun jupyter-arun  1209 May 16 23:20 load_events.py.   
+-rw-r--r--  1 jupyter-arun jupyter-arun   656 May 16 21:23 load_topology.py.   
+-rw-r--r--  1 jupyter-arun jupyter-arun  1069 May 16 19:40 cleanup_data.py.   
+-rw-rw-r--  1 jupyter-arun jupyter-arun    21 May 12 00:30 requirements.txt.   
+drwx------  3 jupyter-arun jupyter-arun  4096 May 11 20:34 .cache.  
+drwxr-xr-x  3 jupyter-arun jupyter-arun  4096 May 11 03:10 .ipython.   
+drwxr-xr-x  3 jupyter-arun jupyter-arun  4096 Apr  7 04:46 .jupyter.   
+drwxr-xr-x  3 jupyter-arun jupyter-arun  4096 Apr  7 01:33 .local.  
+-rw-r--r--  1 jupyter-arun jupyter-arun   220 Mar 31  2024 .bash_logout.    
+-rw-r--r--  1 jupyter-arun jupyter-arun  3771 Mar 31  2024 .bashrc.    
+-rw-r--r--  1 jupyter-arun jupyter-arun   807 Mar 31  2024 .profile.     

@@ -215,16 +215,74 @@ WHERE cell_id = 'CELL001801'
 ORDER BY window_start DESC 
 LIMIT 3;
 
+-- 1. Force Impala to see the new Spark files
+INVALIDATE METADATA ohana.live_inference_stream;
+
+-- 2. Query the data using the smart timezone caster
+SELECT 
+    from_utc_timestamp(window_start, 'America/Los_Angeles') AS local_window_start, 
+    rolling_ul_utilization_pct 
+FROM ohana.live_inference_stream 
+WHERE cell_id = 'CELL001801' 
+ORDER BY window_start DESC 
+LIMIT 3;
+
 DELETE FROM ohana.live_inference_stream 
 WHERE cell_id = 'CELL001801';
-  
+
+-- 1. Inject the spike directly into the lakehouse (Bypassing Spark)
 INSERT INTO ohana.live_inference_stream VALUES (
-    'CELL001801',                   -- 1. cell_id
-    now(),                          -- 2. window_start
-    now() + interval 5 minutes,     -- 3. window_end
-    98.75,                          -- 4. rolling_ul_utilization_pct (The Spike)
-    4.5,                            -- 5. rolling_dl_throughput_mbps (Throttled)
-    46500.0                         -- 6. rolling_active_ue_count    (Massive Crowd)
+    'CELL001801',                   -- cell_id
+    now(),                          -- window_start (Current Time)
+    now() + interval 5 minutes,     -- window_end
+    98.75,                          -- rolling_ul_utilization_pct (THE SPIKE)
+    4.5,                            -- rolling_dl_throughput_mbps
+    46500.0                         -- rolling_active_ue_count
 );
 
+-- 2. Force Impala to see the new manual insert
+INVALIDATE METADATA ohana.live_inference_stream;
+
+-- 3. Verify it is sitting at the very top of the table
+SELECT 
+    window_start, 
+    rolling_ul_utilization_pct 
+FROM ohana.live_inference_stream 
+WHERE cell_id = 'CELL001801' 
+ORDER BY window_start DESC 
+LIMIT 3;
+  
+
 DESCRIBE ohana.live_inference_stream;
+
+
+SELECT event_name, event_start_ts, event_end_ts, now() as current_db_time
+FROM ohana.events_calendar
+WHERE now() BETWEEN event_start_ts AND event_end_ts;
+
+INVALIDATE METADATA ohana.events_calendar;
+
+SELECT event_name, event_start_ts, event_end_ts 
+FROM ohana.events_calendar 
+WHERE event_id = 'MOCK-EVNT-01';
+
+SELECT 
+    cell_id,
+    MAX(ul_prb_utilization_pct) AS max_uplink_util,
+    MAX(dl_prb_utilization_pct) AS max_downlink_util,
+    COUNT(*) AS records_per_tower
+FROM ohana.ml_feature_store
+GROUP BY cell_id
+ORDER BY max_uplink_util DESC
+LIMIT 10;
+
+
+select count(*) from ml_feature_store;
+select count(*) from pm_curated;
+select count(*) from streaming_kpi_agg;
+
+SELECT e.event_name, e.surge_multiplier_estimate
+            FROM ohana.topology t
+            JOIN ohana.events_calendar e ON t.special_venue_id = e.venue_id
+            WHERE t.cell_id = 'CELL001801' AND now() >= e.event_start_ts AND now() <= e.event_end_ts
+            LIMIT 1

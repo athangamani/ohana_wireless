@@ -22,6 +22,23 @@ cde spark submit \
  --python-env-resource-name pm-pandas-env \
  pm_batch_dq.py
 
+
+cde spark submit \
+ --min-executors=4 \
+ --executor-memory=10G \
+ --executor-cores=4 \
+ --conf "spark.driver.memory=8g" \
+ --conf "spark.driver.cores=2" \
+ --conf "spark.dynamicAllocation.initialExecutors=4" \
+ --conf "spark.dynamicAllocation.maxExecutors=18" \
+ --conf "spark.kerberos.access.hadoopFileSystems=s3a://ps-amer-ohana-telecom" \
+ --conf "spark.hadoop.fs.s3a.endpoint.region=us-east-2" \
+ --conf "spark.hadoop.fs.s3a.endpoint=s3.us-east-2.amazonaws.com" \
+ --packages "com.databricks:spark-xml_2.12:0.17.0" \
+ --python-env-resource-name pm-pandas-env \
+ training_gbt_classifier_model.py
+
+
 cde spark submit --min-executors=4   \
  --executor-memory=10G   \
  --executor-cores=4   \

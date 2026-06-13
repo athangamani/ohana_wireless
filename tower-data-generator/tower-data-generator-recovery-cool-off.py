@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import numpy as np
 import time
@@ -5,28 +6,32 @@ from datetime import datetime, timedelta
 import paramiko
 import io
 
-# --- AWS SFTP CONFIGURATION ---
-SFTP_HOST = "35.91.66.114"
-SFTP_USER = "ubuntu"
-SFTP_KEY_PATH = "athangamani-cdp-oregon.pem"
+# --- SECURE SFTP CONFIGURATION ---
+# Export these in your terminal before running:
+# export SFTP_USER="ubuntu"
+# export SFTP_KEY_PATH="athangamani-cdp-oregon.pem"
+SFTP_HOST = os.getenv("SFTP_HOST", "35.91.66.114") 
+SFTP_USER = os.getenv("SFTP_USER", "ubuntu")
+SFTP_KEY_PATH = os.getenv("SFTP_KEY_PATH", "athangamani-cdp-oregon.pem")
 UPLOAD_DIR = "/home/ubuntu/cell_data_drop/"
 
 TARGET_ALERT_CELL = "CELL001801"
 CELL_TOWERS = [TARGET_ALERT_CELL, "CELL001802", "CELL001803", "CELL001804", "CELL001805"]
 
-# We need exactly 5 files, spaced 1 real-world minute apart
+# We only need 2 files to establish the negative velocity drop
 BATCHES_TO_GENERATE = 8   
-SLEEP_BETWEEN_BATCHES = 5 # Force a full 60-second delay between uploads
+SLEEP_BETWEEN_BATCHES = 5
 
 def generate_telemetry(cell_id, simulated_time):
     if cell_id == TARGET_ALERT_CELL:
-        # 💥 CHAOS MONKEY
-        ul_util = round(np.random.uniform(96.0, 99.2), 2)
-        dl_thru = round(np.random.uniform(3.5, 9.8), 2)       
-        active_ue = int(np.random.uniform(42000, 48000))      
+        # 🟢 AGENTIC HEALING STATE (Traffic offloaded, cooling down)
+        # 🟢 AGENTIC HEALING STATE (Dramatically lowered to yank the average down)
+        ul_util = round(np.random.uniform(5.0, 15.0), 2)  # Plummets to ~10%        
+        dl_thru = round(np.random.uniform(150.0, 220.0), 2)       
+        active_ue = int(np.random.uniform(28000, 31000))   # ~30% of users rerouted
         rrc_conn = int(active_ue * 0.97)
     else:
-        # Normal
+        # Normal Background Noise
         ul_util = round(np.random.uniform(10.0, 65.0), 2)
         dl_thru = round(np.random.uniform(150.0, 600.0), 2)
         active_ue = int(np.random.uniform(50, 1200))
@@ -45,20 +50,26 @@ def generate_telemetry(cell_id, simulated_time):
     }
 
 def push_to_ftp_sequential():
-    print(f"Initializing Sequential CHAOS Flush for {TARGET_ALERT_CELL}...")
+    if not SFTP_USER or not SFTP_KEY_PATH:
+        print("❌ ERROR: Missing SFTP_USER or SFTP_KEY_PATH environment variables.")
+        return
+
+    print(f"Initializing 🟢 RECOVERY Flush for {TARGET_ALERT_CELL}...")
     
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    
+    cumulative_records_processed = 0
+    cumulative_bytes_uploaded = 0
     
     try:
         ssh.connect(SFTP_HOST, username=SFTP_USER, key_filename=SFTP_KEY_PATH)
         sftp = ssh.open_sftp()
         
-        # Start the clock right now
         current_sim_time = datetime.utcnow()
         
         for batch_num in range(BATCHES_TO_GENERATE):
-            print(f"[{current_sim_time.strftime('%H:%M:%S')}] Pushing Minute {batch_num + 1}/{BATCHES_TO_GENERATE} (Sim Time: {current_sim_time.strftime('%H:%M')})")
+            print(f"[{current_sim_time.strftime('%H:%M:%S')}] Pushing Recovery Minute {batch_num + 1}/{BATCHES_TO_GENERATE}")
             
             for cell in CELL_TOWERS:
                 df = pd.DataFrame([generate_telemetry(cell, current_sim_time)])
@@ -69,18 +80,25 @@ def push_to_ftp_sequential():
                 df.to_csv(csv_buffer, index=False)
                 csv_buffer.seek(0)
                 
-                bytes_buffer = io.BytesIO(csv_buffer.getvalue().encode('utf-8'))
+                payload_bytes = csv_buffer.getvalue().encode('utf-8')
+                bytes_buffer = io.BytesIO(payload_bytes)
                 remote_path = f"{UPLOAD_DIR}{filename}"
                 sftp.putfo(bytes_buffer, remote_path, confirm=False)
                 
-            # Increment the clock by EXACTLY ONE MINUTE to build the Spark window
+                # Tracking cumulative metrics
+                cumulative_records_processed += len(df)
+                cumulative_bytes_uploaded += len(payload_bytes)
+                
+            print(f"   -> Cumulative Metrics: {cumulative_records_processed} total records | {cumulative_bytes_uploaded} bytes processed")
+            
             current_sim_time += timedelta(minutes=5)
-            time.sleep(SLEEP_BETWEEN_BATCHES)
+            
+            if batch_num < BATCHES_TO_GENERATE - 1:
+                time.sleep(SLEEP_BETWEEN_BATCHES)
 
         sftp.close()
         ssh.close()
-        print("\n💥 Sequential Flush Complete! 5 contiguous minutes delivered.")
-        print("Wait ~60 seconds for Spark to close the window, then test!")
+        print("\n🟢 Recovery Flush Complete! The LangGraph Agent has healed the network.")
         
     except Exception as e:
         print(f"Failed to connect or upload: {e}")

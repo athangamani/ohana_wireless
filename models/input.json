@@ -1,18 +1,3 @@
 {
-  "hour_sin": 0.5,
-  "hour_cos": 0.866,
-  "dow_sin": 0.433,
-  "dow_cos": -0.9,
-  "prb_lag_1": 45.2,
-  "prb_lag_4": 42.1,
-  "prb_lag_8": 39.5,
-  "prb_lag_96": 44.0,
-  "prb_lag_672": 46.1,
-  "prb_roll_mean_1hr": 43.5,
-  "prb_roll_std_1hr": 1.2,
-  "prb_roll_mean_24hr": 38.9,
-  "prb_roll_std_24hr": 5.5,
-  "neighbor_avg_prb_util_t1": 41.2,
-  "neighbor_max_prb_util_t1": 50.1,
-  "hours_to_next_event": 12.5
+  "cell_id": "CELL001801"
 }

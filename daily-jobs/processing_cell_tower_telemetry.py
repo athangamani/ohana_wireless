@@ -69,15 +69,17 @@ curated_output = base_curated_df.select(
 stream_a = curated_output.writeStream \
     .format("iceberg") \
     .outputMode("append") \
-    .option("checkpointLocation", "s3a://ps-amer-ohana-telecom/checkpoints/pm_curated_v3/") \
+    .option("checkpointLocation", "s3a://ps-amer-ohana-telecom/checkpoints/pm_curated_v5/") \
     .toTable("ohana.pm_curated")
 
 # ========================================================================================
 # STREAM B: The Live Inference Speed Layer (Writes to live_inference_stream)
 # ========================================================================================
 print("Starting Stream B: Routing 15-minute rolling aggregations to ohana.live_inference_stream...")
+
+# DEMO FIX: Watermark reduced from 10 minutes to 1 minute for instant database writes
 rolling_features_df = base_curated_df \
-    .withWatermark("collection_timestamp", "10 minutes") \
+    .withWatermark("collection_timestamp", "1 minute") \
     .groupBy(window(col("collection_timestamp"), "15 minutes", "5 minutes"), col("cell_id")) \
     .agg(
         avg("ul_prb_utilization_pct").alias("rolling_ul_utilization_pct"),
@@ -97,7 +99,7 @@ inference_output = rolling_features_df.select(
 stream_b = inference_output.writeStream \
     .format("iceberg") \
     .outputMode("append") \
-    .option("checkpointLocation", "s3a://ps-amer-ohana-telecom/checkpoints/live_inference_v3/") \
+    .option("checkpointLocation", "s3a://ps-amer-ohana-telecom/checkpoints/live_inference_v5/") \
     .toTable("ohana.live_inference_stream")
 
 # Await termination for BOTH streams

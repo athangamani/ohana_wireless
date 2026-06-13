@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import time
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 import paramiko
 import io
 
@@ -13,14 +13,14 @@ UPLOAD_DIR = "/home/ubuntu/cell_data_drop/"
 
 # --- SIMULATION CONFIGURATION ---
 # Using some Pacific Northwest towers for the simulation
-CELL_TOWERS = ["SEA-001", "SEA-002", "ISQ-001", "BLL-001"] 
+CELL_TOWERS = ["CELL001801", "CELL001802", "CELL001803", "CELL001804", "CELL001805"]
 INTERVAL_SECONDS = 300 # 5 minutes
 
 def generate_telemetry(cell_id):
     """Generates a single row of synthetic tower telemetry"""
     return {
         "cell_id": cell_id,
-        "collection_timestamp": datetime.now().isoformat(),
+        "collection_timestamp": datetime.utcnow().isoformat(),
         "technology": "5G_NR",
         "ul_prb_utilization_pct": round(np.random.uniform(10.0, 85.0), 2),
         "dl_throughput_mbps": round(np.random.uniform(50.0, 800.0), 2),
@@ -30,7 +30,8 @@ def generate_telemetry(cell_id):
     }
 
 def push_to_ftp():
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] Waking up to generate PM files...")
+    current_sim_time = datetime.utcnow()
+    print(f"[{current_sim_time.strftime('%H:%M:%S')}] Waking up to generate PM files...")
     
     # Connect to AWS SFTP
     ssh = paramiko.SSHClient()
@@ -45,7 +46,7 @@ def push_to_ftp():
             df = pd.DataFrame([generate_telemetry(cell)])
             
             # Create standard Telco filename
-            timestamp_str = datetime.now().strftime('%Y%m%d_%H%M%S')
+            timestamp_str = current_sim_time.strftime('%Y%m%d_%H%M%S')
             filename = f"PM_{cell}_{timestamp_str}.csv"
             
             # Write DataFrame to a string buffer

@@ -88,6 +88,31 @@ also there is a nightly job that in under airflow folder which runs 3 jobs
     events_master_pipeline.py.   
     feature_engineering_incremental.py.  
     kpi_sliding_window.py - the kpi metrics is for dashboards we did not use it anywhere.  
+    to load the nightly job here are the commands i used.  
+        240  cde resource upload --name ohana-ml-scripts --local-path daily_pipeline.py. 
+        241  cde resource upload --name ohana-ml-scripts --local-path kpi_sliding_window.py. 
+        242  cde resource upload --name ohana-ml-scripts --local-path feature_engineering_incremental.py. 
+        243  cde job run --name ohana_nightly_ml_pipeline  
+        244  cde resource upload --name ohana-ml-scripts --local-path daily_pipeline.py.  
+        245  cde resource upload --name ohana-ml-scripts --local-path kpi_sliding_window.py.  
+        246  cde resource upload --name ohana-ml-scripts --local-path feature_engineering_incremental.py.  
+        247  cde job run --name ohana_nightly_ml_pipeline.  
+        
+        249  cde resource upload --name ohana-ml-scripts --local-path feature_engineering_incremental.py.  
+        250  cde resource upload --name ohana-ml-scripts --local-path kpi_sliding_window.py.  
+        251  cde job run --name ohana_nightly_ml_pipeline.  
+        252  cde resource upload --name ohana-ml-scripts --local-path daily_pipeline.py.  
+        253  less daily_pipeline.py    
+        254  cde job run --name ohana_nightly_ml_pipeline.   
+        255  cde job update --name feature_engineering_incremental_job   --arg "--execution_date"   --arg "{{{ execution_date }}}".    
+        256  cde job update --name kpi_sliding_window_job   --arg "--execution_date"   --arg "{{{ execution_date }}}".   
+        257  cde resource upload --name ohana-ml-scripts --local-path daily_pipeline.py.   
+        258  cde resource upload --name ohana-ml-scripts --local-path kpi_sliding_window.py.  
+        259  cde resource upload --name ohana-ml-scripts --local-path feature_engineering_incremental.py.  
+        260  cde job run --name ohana_nightly_ml_pipeline.  
+        261  cde resource upload --name ohana-ml-scripts --local-path feature_engineering_incremental.py.    
+        262  cde resource upload --name ohana-ml-scripts --local-path kpi_sliding_window.py.   
+        263  cde job run --name ohana_nightly_ml_pipeline.   
 
 demo steps.  
 0) train and deploy the demo. 

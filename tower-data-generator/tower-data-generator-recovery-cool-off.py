@@ -6,10 +6,6 @@ from datetime import datetime, timedelta
 import paramiko
 import io
 
-# --- SECURE SFTP CONFIGURATION ---
-# Export these in your terminal before running:
-# export SFTP_USER="ubuntu"
-# export SFTP_KEY_PATH="athangamani-cdp-oregon.pem"
 SFTP_HOST = os.getenv("SFTP_HOST", "35.91.66.114") 
 SFTP_USER = os.getenv("SFTP_USER", "ubuntu")
 SFTP_KEY_PATH = os.getenv("SFTP_KEY_PATH", "athangamani-cdp-oregon.pem")
@@ -18,17 +14,15 @@ UPLOAD_DIR = "/home/ubuntu/cell_data_drop/"
 TARGET_ALERT_CELL = "CELL001801"
 CELL_TOWERS = [TARGET_ALERT_CELL, "CELL001802", "CELL001803", "CELL001804", "CELL001805"]
 
-# We only need 2 files to establish the negative velocity drop
 BATCHES_TO_GENERATE = 8   
 SLEEP_BETWEEN_BATCHES = 5
 
 def generate_telemetry(cell_id, simulated_time):
     if cell_id == TARGET_ALERT_CELL:
-        # 🟢 AGENTIC HEALING STATE (Traffic offloaded, cooling down)
-        # 🟢 AGENTIC HEALING STATE (Dramatically lowered to yank the average down)
-        ul_util = round(np.random.uniform(5.0, 15.0), 2)  # Plummets to ~10%        
+        # 🟢 AGENTIC HEALING STATE (Plummets to ~10%)
+        ul_util = round(np.random.uniform(5.0, 15.0), 2)        
         dl_thru = round(np.random.uniform(150.0, 220.0), 2)       
-        active_ue = int(np.random.uniform(28000, 31000))   # ~30% of users rerouted
+        active_ue = int(np.random.uniform(28000, 31000))  
         rrc_conn = int(active_ue * 0.97)
     else:
         # Normal Background Noise
@@ -41,7 +35,7 @@ def generate_telemetry(cell_id, simulated_time):
         "cell_id": cell_id,
         "collection_timestamp": simulated_time.isoformat(),
         "technology": "5G_NR",
-        "dl_prb_utilization_pct": 0.0,  # <-- ADD THIS MISSING COLUMN
+        "dl_prb_utilization_pct": 0.0, 
         "ul_prb_utilization_pct": ul_util,
         "dl_throughput_mbps": dl_thru,
         "active_ue_count": active_ue,
@@ -66,7 +60,11 @@ def push_to_ftp_sequential():
         ssh.connect(SFTP_HOST, username=SFTP_USER, key_filename=SFTP_KEY_PATH)
         sftp = ssh.open_sftp()
         
-        current_sim_time = datetime.utcnow()
+        # -----------------------------------------------------------------------
+        # THE FIX: Start the clock 60 minutes in the future!
+        # -----------------------------------------------------------------------
+        current_sim_time = datetime.utcnow() + timedelta(minutes=60)
+        print(f"Recovery Start Time (Simulated): {current_sim_time.strftime('%H:%M:%S')} (Offset to clear Spark Window)")
         
         for batch_num in range(BATCHES_TO_GENERATE):
             print(f"[{current_sim_time.strftime('%H:%M:%S')}] Pushing Recovery Minute {batch_num + 1}/{BATCHES_TO_GENERATE}")
@@ -85,7 +83,6 @@ def push_to_ftp_sequential():
                 remote_path = f"{UPLOAD_DIR}{filename}"
                 sftp.putfo(bytes_buffer, remote_path, confirm=False)
                 
-                # Tracking cumulative metrics
                 cumulative_records_processed += len(df)
                 cumulative_bytes_uploaded += len(payload_bytes)
                 
@@ -96,9 +93,24 @@ def push_to_ftp_sequential():
             if batch_num < BATCHES_TO_GENERATE - 1:
                 time.sleep(SLEEP_BETWEEN_BATCHES)
 
+        # =======================================================================
+        # NEW CODE INSERTED HERE: The Watermark Chaser
+        # =======================================================================
+        print("\n[FDE Hack] Pushing a Watermark Chaser 20 minutes into the future to flush the final windows...")
+        chaser_time = current_sim_time + timedelta(minutes=20)
+        chaser_df = pd.DataFrame([generate_telemetry(TARGET_ALERT_CELL, chaser_time)])
+        
+        csv_buffer = io.StringIO()
+        chaser_df.to_csv(csv_buffer, index=False)
+        chaser_bytes = io.BytesIO(csv_buffer.getvalue().encode('utf-8'))
+        
+        # Uploading the chaser file
+        sftp.putfo(chaser_bytes, f"{UPLOAD_DIR}PM_FLUSH_{chaser_time.strftime('%Y%m%d_%H%M%S')}.csv", confirm=False)
+        # =======================================================================
+        
         sftp.close()
         ssh.close()
-        print("\n🟢 Recovery Flush Complete! The LangGraph Agent has healed the network.")
+        print("\n🟢 Recovery Flush Complete! Spark watermark advanced. Values should drop instantly in Impala.")
         
     except Exception as e:
         print(f"Failed to connect or upload: {e}")

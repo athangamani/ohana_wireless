@@ -14,9 +14,8 @@ UPLOAD_DIR = "/home/ubuntu/cell_data_drop/"
 TARGET_ALERT_CELL = "CELL001801"
 CELL_TOWERS = [TARGET_ALERT_CELL, "CELL001802", "CELL001803", "CELL001804", "CELL001805"]
 
-# We need exactly 5 files, spaced 1 real-world minute apart
 BATCHES_TO_GENERATE = 8   
-SLEEP_BETWEEN_BATCHES = 5 # Force a full 60-second delay between uploads
+SLEEP_BETWEEN_BATCHES = 5 
 
 def generate_telemetry(cell_id, simulated_time):
     if cell_id == TARGET_ALERT_CELL:
@@ -36,7 +35,7 @@ def generate_telemetry(cell_id, simulated_time):
         "cell_id": cell_id,
         "collection_timestamp": simulated_time.isoformat(),
         "technology": "5G_NR",
-        "dl_prb_utilization_pct": 0.0,  # <-- ADD THIS MISSING COLUMN
+        "dl_prb_utilization_pct": 0.0, 
         "ul_prb_utilization_pct": ul_util,
         "dl_throughput_mbps": dl_thru,
         "active_ue_count": active_ue,
@@ -54,11 +53,12 @@ def push_to_ftp_sequential():
         ssh.connect(SFTP_HOST, username=SFTP_USER, key_filename=SFTP_KEY_PATH)
         sftp = ssh.open_sftp()
         
-        # Start the clock right now
+        # Baseline time starts NOW
         current_sim_time = datetime.utcnow()
+        print(f"Anomaly Start Time (Simulated): {current_sim_time.strftime('%H:%M:%S')}")
         
         for batch_num in range(BATCHES_TO_GENERATE):
-            print(f"[{current_sim_time.strftime('%H:%M:%S')}] Pushing Minute {batch_num + 1}/{BATCHES_TO_GENERATE} (Sim Time: {current_sim_time.strftime('%H:%M')})")
+            print(f"[{current_sim_time.strftime('%H:%M:%S')}] Pushing Minute {batch_num + 1}/{BATCHES_TO_GENERATE}")
             
             for cell in CELL_TOWERS:
                 df = pd.DataFrame([generate_telemetry(cell, current_sim_time)])
@@ -73,14 +73,13 @@ def push_to_ftp_sequential():
                 remote_path = f"{UPLOAD_DIR}{filename}"
                 sftp.putfo(bytes_buffer, remote_path, confirm=False)
                 
-            # Increment the clock by EXACTLY ONE MINUTE to build the Spark window
+            # Increment the clock
             current_sim_time += timedelta(minutes=5)
             time.sleep(SLEEP_BETWEEN_BATCHES)
 
         sftp.close()
         ssh.close()
-        print("\n💥 Sequential Flush Complete! 5 contiguous minutes delivered.")
-        print("Wait ~60 seconds for Spark to close the window, then test!")
+        print("\n💥 Sequential Flush Complete! 40 simulated minutes of anomaly data delivered.")
         
     except Exception as e:
         print(f"Failed to connect or upload: {e}")
